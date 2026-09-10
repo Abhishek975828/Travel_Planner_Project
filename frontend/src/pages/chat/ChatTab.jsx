@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import axios from "axios";
+import api from "../../api/axios";
 import { io } from "socket.io-client";
 
 function ChatTab({ tripId }) {
@@ -10,8 +10,6 @@ function ChatTab({ tripId }) {
   const [error, setError] = useState("");
 
   const messagesEndRef = useRef(null);
-
-  const token = localStorage.getItem("token");
 
   // Get current logged-in user
   let currentUser = null;
@@ -27,13 +25,8 @@ function ChatTab({ tripId }) {
   // Load old messages
   async function fetchMessages() {
     try {
-      const response = await axios.get(
-        `http://localhost:5000/api/trips/${tripId}/messages`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const response = await api.get(
+        `/api/trips/${tripId}/messages`
       );
 
       setMessages(response.data);
@@ -55,7 +48,7 @@ function ChatTab({ tripId }) {
   useEffect(() => {
     fetchMessages();
 
-    const socket = io("http://localhost:5000");
+    const socket = io(import.meta.env.VITE_API_URL);
 
     socket.emit("joinTrip", tripId);
 
@@ -91,15 +84,10 @@ function ChatTab({ tripId }) {
       setSending(true);
       setError("");
 
-      await axios.post(
-        `http://localhost:5000/api/trips/${tripId}/messages`,
+      await api.post(
+        `/api/trips/${tripId}/messages`,
         {
           text: text.trim(),
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         }
       );
 

@@ -1,22 +1,25 @@
 import axios from "axios";
 
 // One shared axios instance for the whole app.
-// Every file in this folder (auth.js, trips.js, ...) imports this
-// instead of creating its own axios instance.
+// API requests will automatically use the /api prefix.
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL, // e.g. http://localhost:5000/api
+  baseURL: `${import.meta.env.VITE_API_URL}/api`,
 });
 
-// REQUEST interceptor: runs before every request is sent.
-// If we have a saved token, attach it as "Authorization: Bearer <token>"
-// so protected backend routes accept the request.
+// REQUEST interceptor
+// Attach JWT token to protected requests.
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("token");
+
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+
   return config;
 });
+
+// RESPONSE interceptor
+// If token is invalid/expired, remove saved login data.
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -24,6 +27,7 @@ api.interceptors.response.use(
       localStorage.removeItem("token");
       localStorage.removeItem("user");
     }
+
     return Promise.reject(error);
   }
 );

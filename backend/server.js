@@ -1,4 +1,5 @@
 require("dns").setServers(["8.8.8.8", "1.1.1.1"]);
+
 const express = require("express");
 const dotenv = require("dotenv");
 const cors = require("cors");
@@ -10,7 +11,10 @@ const authRoutes = require("./routes/authRoutes");
 const tripRoutes = require("./routes/tripRoutes");
 const activityRoutes = require("./routes/activityRoutes");
 const expenseRoutes = require("./routes/expenseRoutes");
-const { notFound, errorHandler } = require("./middleware/errorMiddleware");
+const {
+  notFound,
+  errorHandler,
+} = require("./middleware/errorMiddleware");
 
 dotenv.config();
 connectDB();
@@ -20,10 +24,16 @@ const app = express();
 // Create HTTP server
 const server = http.createServer(app);
 
+// Allowed frontend URLs
+const allowedOrigins = [
+  "http://localhost:5173",
+  process.env.FRONTEND_URL,
+].filter(Boolean);
+
 // Socket.IO setup
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: allowedOrigins,
     methods: ["GET", "POST"],
   },
 });
@@ -34,7 +44,9 @@ app.set("io", io);
 // Middleware
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: allowedOrigins,
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    credentials: true,
   })
 );
 
