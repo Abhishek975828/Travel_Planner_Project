@@ -26,7 +26,7 @@ function ChatTab({ tripId }) {
   async function fetchMessages() {
     try {
       const response = await api.get(
-        `/api/trips/${tripId}/messages`
+        `/trips/${tripId}/messages`
       );
 
       setMessages(response.data);
@@ -85,7 +85,7 @@ function ChatTab({ tripId }) {
       setError("");
 
       await api.post(
-        `/api/trips/${tripId}/messages`,
+        `/trips/${tripId}/messages`,
         {
           text: text.trim(),
         }
